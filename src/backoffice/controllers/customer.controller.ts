@@ -17,7 +17,7 @@ export class CustomerController {
     }
 
     @Post()
-    @UseInterceptors(new ValidatorInterceptor(new CreateCustomerContract()))
+    //@UseInterceptors(new ValidatorInterceptor(new CreateCustomerContract()))
     post(@Body() body: Customer) {
         return new Result('Cliente criado com sucesso', true, body, null);
     }
