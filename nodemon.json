@@ -1,0 +1,6 @@
+{
+    "watch": ["scr"],
+    "ext": "ts",
+    "ignore": ["src/**/*.spec.ts"],
+    "exec": "tsc-watch -p tsconfig.build.json --onSuccess \"node dist/main.js\""
+}
