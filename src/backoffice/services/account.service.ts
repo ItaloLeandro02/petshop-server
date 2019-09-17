@@ -8,9 +8,9 @@ export class AccountService {
     constructor(@InjectModel('User') private readonly model: Model<User>) {
 
     }
-    create(data: User)
+    async create(data: User)
         : Promise<User>  {
         const user = new this.model(data);
-        return user.save();
+        return await user.save();
     }
 }
