@@ -64,4 +64,46 @@ export const CustomerSchema = new mongoose.Schema({
             type: String,
         },
     },
-})
+    shippingAddress: {
+        zipcode: {
+            type: String,
+        },
+        street: {
+            type: String,
+        },
+        number: {
+            type: String,
+        },
+        complement: {
+            type: String,
+        },
+        neighborhood: {
+            type: String,
+        },
+        city: {
+            type: String,
+        },
+        state: {
+            type: String,
+        },
+        country: {
+            type: String,
+        },
+    },
+    card: {
+        number: {
+            type: String,
+        },
+        holder: {
+            type: String,
+        },
+        expiration: {
+            type: String,
+        },
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
+});
