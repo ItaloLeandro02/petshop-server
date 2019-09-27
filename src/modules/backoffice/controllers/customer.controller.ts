@@ -1,25 +1,26 @@
-import { Controller, Get, Put, Post, Delete, Param, Body, UseInterceptors, HttpException, HttpStatus, Res } from '@nestjs/common';
+import { Controller, Get, Put, Post, Param, Body, UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
 import { Result } from '../models/result.model';
-import { ValidatorInterceptor } from '../../interceptors/validator.interceptor';
+import { ValidatorInterceptor } from '../../../interceptors/validator.interceptor';
 import { CreateCustomerContract } from '../contracts/customer/create-customer.contract';
 import { CreateCustomerDto } from '../dtos/create-customer.dto';
 import { AccountService } from '../services/account.service';
 import { CustomerService } from '../services/customer.service';
 import { User } from '../models/user.model';
 import { Customer } from '../models/customer.model';
-import { async } from 'rxjs/internal/scheduler/async';
 import { Address } from '../models/address.model';
 import { CreateAddressContract } from '../contracts/customer/create-address.contracr';
 import { CreatePetContract } from '../contracts/customer/create-pet.contract';
 import { Pet } from '../models/pet.model';
-import { identifier } from '@babel/types';
 import { QueryDto } from '../dtos/query.dto';
+import { AddressService } from '../services/address.service';
+import { AddressType } from '../enums/address-type.enum';
 
 @Controller('v1/customers') 
 export class CustomerController {
     constructor(
         private readonly accountService:AccountService,
-        private readonly customerService:CustomerService
+        private readonly customerService:CustomerService,
+        private readonly addressService:AddressService
         ) {
 
     } 
@@ -59,7 +60,7 @@ export class CustomerController {
     @UseInterceptors(new ValidatorInterceptor(new CreateAddressContract()))
     async addBillingAddress(@Param('document') document, @Body() model: Address) {
         try {
-            await this.customerService.addBillingAddress(document, model);
+            await this.addressService.create(document, model, AddressType.Billing);
             return new Result(null, true, model, null);  
         } catch (error) {
             throw new HttpException(new Result('Não foi possível adicionar seu endereço', false, null, error), HttpStatus.BAD_REQUEST);
@@ -70,7 +71,7 @@ export class CustomerController {
     @UseInterceptors(new ValidatorInterceptor(new CreateAddressContract()))
     async addShippingAddress(@Param('document') document, @Body() model: Address) {
         try {
-            await this.customerService.addShippingAddress(document, model);
+            await this.addressService.create(document, model, AddressType.Shipping);
             return new Result(null, true, model, null); 
         } catch (error) {
             throw new HttpException(new Result('Não foi possível adicionar seu endereço', false, null, error), HttpStatus.BAD_REQUEST);

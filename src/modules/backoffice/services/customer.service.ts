@@ -1,10 +1,10 @@
-import { Model } from 'mongoose'
+import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { Customer } from '../models/customer.model';
-import { InjectModel } from '@nestjs/mongoose';
 import { Address } from '../models/address.model';
 import { Pet } from '../models/pet.model';
 import { QueryDto } from '../dtos/query.dto';
+import { Model } from 'mongoose'
 
 @Injectable()
 export class CustomerService {
@@ -15,28 +15,6 @@ export class CustomerService {
         : Promise<Customer>  {
         const customer = new this.model(data);
         return await customer.save();
-    }
-
-    async addBillingAddress(document: string, data:Address)
-        : Promise<Customer> {
-
-            const options = { upsert: true };
-            return await this.model.findOneAndUpdate({ document }, {
-                $set: {
-                    billingAddress: data,
-                },
-            }, options);
-    }
-
-    async addShippingAddress(document: string, data:Address)
-        : Promise<Customer> {
-
-            const options = { upsert: true };
-            return await this.model.findOneAndUpdate({ document }, {
-                $set: {
-                    shippingAddress: data,
-                },
-            }, options);
     }
 
     async createPet(document: string, data: Pet) 
