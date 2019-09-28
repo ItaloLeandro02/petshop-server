@@ -1,29 +1,26 @@
-import { Controller, Get, Put, Post, Param, Body, UseInterceptors, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Param, Body, UseInterceptors, HttpException, HttpStatus, Put } from '@nestjs/common';
 import { Result } from '../models/result.model';
 import { ValidatorInterceptor } from '../../../interceptors/validator.interceptor';
 import { CreateCustomerContract } from '../contracts/customer/create-customer.contract';
-import { CreateCustomerDto } from '../dtos/create-customer.dto';
+import { CreateCustomerDto } from '../dtos/customer/create-customer.dto';
 import { AccountService } from '../services/account.service';
 import { CustomerService } from '../services/customer.service';
 import { User } from '../models/user.model';
 import { Customer } from '../models/customer.model';
-import { Address } from '../models/address.model';
-import { CreateAddressContract } from '../contracts/customer/create-address.contracr';
-import { CreatePetContract } from '../contracts/customer/create-pet.contract';
-import { Pet } from '../models/pet.model';
 import { QueryDto } from '../dtos/query.dto';
-import { AddressService } from '../services/address.service';
-import { AddressType } from '../enums/address-type.enum';
+import { UpdateCustomerContract } from '../contracts/customer/update-customer.contract';
+import { UpdateCustomerDto } from '../dtos/customer/update-customer.dto';
+import { CreateCreditCardContract } from '../contracts/customer/create-credit-card.contract';
+import { async } from 'rxjs/internal/scheduler/async';
+import { CreditCard } from '../models/credit-card.model';
+import { QueryContract } from '../contracts/query.contract';
 
 @Controller('v1/customers') 
 export class CustomerController {
     constructor(
         private readonly accountService:AccountService,
-        private readonly customerService:CustomerService,
-        private readonly addressService:AddressService
-        ) {
-
-    } 
+        private readonly customerService:CustomerService        
+    ) {} 
 
     @Get()
     async getAll() {
@@ -56,53 +53,32 @@ export class CustomerController {
         }
     }
 
-    @Post(':document/addresses/billing')
-    @UseInterceptors(new ValidatorInterceptor(new CreateAddressContract()))
-    async addBillingAddress(@Param('document') document, @Body() model: Address) {
-        try {
-            await this.addressService.create(document, model, AddressType.Billing);
-            return new Result(null, true, model, null);  
-        } catch (error) {
-            throw new HttpException(new Result('Não foi possível adicionar seu endereço', false, null, error), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Post(':document/addresses/shipping')
-    @UseInterceptors(new ValidatorInterceptor(new CreateAddressContract()))
-    async addShippingAddress(@Param('document') document, @Body() model: Address) {
-        try {
-            await this.addressService.create(document, model, AddressType.Shipping);
-            return new Result(null, true, model, null); 
-        } catch (error) {
-            throw new HttpException(new Result('Não foi possível adicionar seu endereço', false, null, error), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @Post(':document/pets')
-    @UseInterceptors(new ValidatorInterceptor(new CreatePetContract()))
-    async createPet(@Param('document') document, @Body() model: Pet) {
-        try {
-            await this.customerService.createPet(document, model);
-            return new Result(null, true, model, null);
-        } catch (error) {
-            throw new HttpException(new Result('Não foi possível criar seu pet', false, null, error), HttpStatus.BAD_REQUEST);
-        }
-    }
-
     @Post('query')
+    @UseInterceptors(new ValidatorInterceptor(new QueryContract()))
     async query(@Body() model: QueryDto) {
         const customers = await this.customerService.query(model);
         return new Result(null, true, customers, null);
     }
 
-    @Put(':document/pets/:id')
-    @UseInterceptors(new ValidatorInterceptor(new CreatePetContract()))
-    async updatePet(@Param('document') document, @Param('id') id, @Body() model: Pet) {
+    @Put(':document')
+    @UseInterceptors(new ValidatorInterceptor(new UpdateCustomerContract()))
+    async update(@Param('document') document, @Body() model: UpdateCustomerDto) {
         try {
-            await this.customerService.updatePet(document, id, model);
+            await this.customerService.update(document, model);
             return new Result(null, true, model, null);
         } catch (error) {
-            throw new HttpException(new Result('Não foi possível atualizar seu pet', false, null, error), HttpStatus.BAD_REQUEST);
+            throw new HttpException(new Result('Não foi possível atualizar seus dados', false, null, error), HttpStatus.BAD_REQUEST);            
+        }
+    }
+
+    @Post(':document/credit-cards')
+    @UseInterceptors(new ValidatorInterceptor(new CreateCreditCardContract()))
+    async createBilling(@Param('document') document, @Body() model: CreditCard) {
+        try {
+            await this.customerService.saveOrUpdateCreditCard(document, model);
+            return new Result(null, true, model, null); 
+        } catch (error) {
+            throw new HttpException(new Result('Não foi possível adicionar seu cartão de crédito', false, null, error), HttpStatus.BAD_REQUEST);
         }
     }
 }
