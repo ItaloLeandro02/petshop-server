@@ -4,6 +4,5 @@ export class CreateCustomerDto {
         public document: string,
         public email: string,
         public password: String,
-    ) {
-    }
+    ) {}
 }
